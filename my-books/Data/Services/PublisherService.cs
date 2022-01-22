@@ -1,4 +1,5 @@
 ﻿using my_books.Data.Models;
+using my_books.Data.Pagging;
 using my_books.Data.ViewModels;
 using my_books.Exceptions;
 using System;
@@ -32,6 +33,35 @@ namespace my_books.Data.Services
 
             return _publisher;
         }
+
+        public List<Publisher> GetAllPublishers(string sortBy, string searchString, int? pageNumber)
+        {
+            var allPublishers = _context.Publishers.OrderBy(x => x.Name).ToList();
+
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy)
+                {
+                    case "name_desc":
+                        allPublishers = allPublishers.OrderByDescending(x => x.Name).ToList();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if(!string.IsNullOrEmpty(searchString))
+            {
+                allPublishers = _context.Publishers.Where(x => x.Name.Contains(searchString)).ToList();
+            }
+
+            //Pagging
+            int pageSize = 5;
+            allPublishers = PaginatedList<Publisher>.Create(allPublishers.AsQueryable(), pageNumber ??1,pageSize);
+
+            return allPublishers;
+        }
+
         public Publisher GetPublisherById(int Id) => _context.Publishers.FirstOrDefault(x => x.Id == Id);
         public PublisherWithBookAndAuthorsVM GetPublisherData(int publisherId)
         {
