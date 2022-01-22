@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using my_books.Data.Services;
 using my_books.Data.ViewModels;
 using my_books.Exceptions;
@@ -15,20 +16,24 @@ namespace my_books.Controllers
     public class PublisherController : ControllerBase
     {
         private PublisherService _publisherService;
-        public PublisherController(PublisherService publisherService)
+        private readonly ILogger<PublisherController> _logger;
+
+        public PublisherController(PublisherService publisherService, ILogger<PublisherController> logger)
         {
             _publisherService = publisherService;
+            _logger = logger;
         }
 
         [HttpGet("get-all-publishers")]
         public IActionResult GetAllPublisers(string sortby, string searchString, int pageNumber)
         {
-            try
+           try
             {
+                _logger.LogInformation("This is just a log in GetAllPulishers()");
                 var _result = _publisherService.GetAllPublishers(sortby, searchString, pageNumber);
                 return Ok(_result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return BadRequest("Sorry, We could not load the publisers");
             }
